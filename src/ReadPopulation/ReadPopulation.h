@@ -18,7 +18,7 @@ struct PopulationInfo{
 };
 
 struct PopulationInfo ReadPopulation( 
-    struct Person** people, 
+    struct Person*** people, 
     FILE* EpidData,
     SetElement** SetWorks,
     SetElement** SetSchools,

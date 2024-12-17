@@ -81,21 +81,38 @@ static void UpdatePlacec(
     struct Person* person, 
     SetElement** SetHH, 
     SetElement** SetWorks, 
-    SetElement** SetSchools
+    SetElement** SetSchools,
+    size_t* HHCount, 
+    size_t* WorkCount,
+    size_t* SchoulCount
 ){
 
-    if( person->household_id != NULL_INDEX ) SetAdd( person->household_id, 0, SetHH );
-    
-    if( person->school_id != NULL_INDEX ) SetAdd( person->school_id, 0, SetSchools );
-    
-    if( person->work_id != NULL_INDEX ) SetAdd( person->work_id, 0, SetWorks );
+    if( person->household_id != NULL_INDEX ){
 
+        SetAdd( person->household_id, *HHCount, SetHH );
+        (*HHCount)++;
+
+    }
+
+    if( person->school_id != NULL_INDEX ){
+
+        SetAdd( person->school_id, *SchoulCount, SetSchools );
+        (*SchoulCount)++;
+
+    }
+
+    if( person->work_id != NULL_INDEX ){
+
+        SetAdd( person->work_id, *WorkCount, SetWorks );
+        (*WorkCount)++;
+
+    }
 }
 
 
 
 struct PopulationInfo ReadPopulation( 
-    struct Person** people, 
+    struct Person*** people, 
     FILE* EpidData,
     SetElement** SetWorks,
     SetElement** SetSchools,
@@ -106,7 +123,9 @@ struct PopulationInfo ReadPopulation(
     size_t PersonId = 0;
     struct IdIndex ids = {-1};
     struct PopulationInfo PopInf = {0};
+    size_t HHCount = 0, WorkCount = 0, SchoulCount = 0;
 
+    // читаем первую строку файла и получаем индексы параметров персоны 
     if( 
         fgets(line, sizeof(line), EpidData) == NULL || 
         GetIdIndex( line, &ids ) != VALID 
@@ -117,7 +136,8 @@ struct PopulationInfo ReadPopulation(
 
     }
 
-
+    // читаем построчно файл, добавляя в связный список новых людей
+    // обновляем множества мест заражения
     while( fgets(line, sizeof(line), EpidData) != NULL ){
 
         struct Person* curr = PersonFromString( 
@@ -135,7 +155,15 @@ struct PopulationInfo ReadPopulation(
 
         }
 
-        UpdatePlacec( curr, SetHH, SetWorks, SetSchools );
+        UpdatePlacec(
+            curr, 
+            SetHH, 
+            SetWorks, 
+            SetSchools, 
+            &HHCount, 
+            &WorkCount,
+            &SchoulCount
+        );
 
         PopAddFront( &population, curr );
     }
@@ -143,9 +171,17 @@ struct PopulationInfo ReadPopulation(
     PopInf.status = VALID;
     PopInf.size = population->person->id + 1;
 
-    *people = PopToArray(population, PopInf.size);
-    
-    PopDestroy( population );
+    // int size = 2, current = 0, actual_size = 0, i = 0;
+    // int* array = malloc(sizeof(int) * size);
+    // array[1] = 2;
+    // printf("%d\n", array[1]);
+
+    // преобразуем связный список людей в массив 
+    // для быстрой адресации к элементам
+    *people = PopToArray( population, PopInf.size );
+
+    // удаляем связный список
+    PopDestroy( population, PopInf.size );
 
     return PopInf;
 }

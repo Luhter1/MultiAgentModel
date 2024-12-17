@@ -37,15 +37,18 @@ size_t PopLength( const struct PeopleLinkedList* list ) {
 }
 
 
-void PopDestroy( struct PeopleLinkedList* list ) {
+void PopDestroy( struct PeopleLinkedList* list, size_t size ) {
+    size_t ind;
     struct PeopleLinkedList* to_del;
-        
-    while (list) {
+
+    if( !list ) return;
+
+    for(ind=0; ind<size; ind++){
         to_del = list;
         list = list -> next; 
-        DeletePerson( to_del->person );
         free( to_del );
     }
+
 }
 
 
@@ -69,15 +72,31 @@ void PopAddBack( struct PeopleLinkedList** old, struct Person* person ) {
     
 }
 
-struct Person* PopToArray(struct PeopleLinkedList* list, size_t size){
-    size_t ind = 0;
-    size_t PersonSize = sizeof(struct Person);
-    struct Person* people = malloc( sizeof(struct Person) * size );
-    while (list) {
-        memcpy(people + ind, list->person, PersonSize);
-        ind++;
+
+
+struct Person** PopToArray(struct PeopleLinkedList* list, size_t size){
+    size_t ind;
+    struct PeopleLinkedList* to_del;
+    struct Person** people = malloc( sizeof(struct Person*) * size );
+
+    for(ind=0; ind<size; ind++){
+        to_del = list;
+        people[ind] = list->person;
         list = list -> next; 
+
     }
 
     return people;
+}
+
+
+
+void DeleteArray(struct Person** people, size_t size){
+    size_t ind;
+
+    for(ind=0; ind<size; ind++){
+        free(people[ind]);
+    }
+
+    free(people);
 }

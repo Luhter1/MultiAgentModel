@@ -32,7 +32,7 @@ int main( int argc, char** argv ) {
     // список связных списков
     struct PeopleLinkedList* work, household, school;
     // список person
-    struct Person* people; 
+    struct Person** people; 
     // связный список 
     struct PeopleLinkedList* illnesses;
     // данные для чтения
@@ -46,8 +46,11 @@ int main( int argc, char** argv ) {
         return errno;
     }
 
+
     /*----------- создание популяции и множества мест заражений ----------*/
     struct PopulationInfo PopInfo = ReadPopulation( &people, EpidData, &SetWorks, &SetSchools, &SetHH );
+
+    // CloseFile( EpidData );
 
     if( PopInfo.status != VALID ){
         destroy(SetWorks, SetSchools, SetHH);
@@ -55,12 +58,14 @@ int main( int argc, char** argv ) {
         return errno;
     }
 
-    printf("%" PRId32 "\n", (people+541)->id);
-    // SetToArray( SetSchools );
-    destroy(SetWorks, SetSchools, SetHH);
 
     /*----------- создание списка мест заражения и списка первоначально больных ----------*/
-    
+    // people, &SetWorks, &SetSchools, &SetHH
 
+    printf("%" PRId32 "\n", people[0]->id);
+    printf("%zu\n", SetGetElement( 500143905, SetWorks )->value);
+
+    DeleteArray( people, PopInfo.size);
+    destroy( SetWorks, SetSchools, SetHH );
     return 0;
 }

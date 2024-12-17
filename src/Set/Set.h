@@ -5,13 +5,15 @@
 
 typedef struct {
     int id;
-    int value;
+    size_t value;
     UT_hash_handle hh;
 } SetElement;
 
-void SetAdd(int id, int value, SetElement** set);
+SetElement* SetGetElement(int id, SetElement* set);
 
-void SetToArray(SetElement* set);
+void SetAdd(int id, size_t value, SetElement** set);
+
+size_t SetLength(SetElement* set);
 
 void SetDeleteALL(SetElement* set);
 
