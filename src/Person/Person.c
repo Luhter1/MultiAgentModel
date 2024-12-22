@@ -1,8 +1,10 @@
 #include "Person.h"
+#include "Utils.h"
 #include <string.h>
 #include <stddef.h>
 #include <malloc.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 #define NULL_INDEX -1
 #define ERROR_INDEX -2
@@ -19,6 +21,7 @@ struct Person* CreatePerson(
     person->work_id = work_id;
     person->school_id = school_id;
     person->household_id = household_id;
+    person->IllDay = 0;
     person->state = SUSCEPTIBLE;
     
     return person;
@@ -27,13 +30,13 @@ struct Person* CreatePerson(
 
 
 static int32_t CheckStrId( char* StrId ){
-    int32_t res; 
+    long res; 
 
     if( strcmp(StrId, "") == 0 ) return NULL_INDEX;
 
-    res = strtol(StrId, NULL, 10);
+    if( GetLong( StrId, &res ) == false ) return ERROR_INDEX;
 
-    return res==0 ? ERROR_INDEX : res;
+    return (int32_t)res;
 }
 
 

@@ -86,7 +86,7 @@ static void UpdatePlacec(
     size_t* WorkCount,
     size_t* SchoulCount
 ){
-
+    // 3 func
     if( person->household_id != NULL_INDEX ){
 
         if(SetGetElement( person->household_id, *SetHH ) == NULL){
@@ -196,13 +196,14 @@ struct PopulationInfo ReadPopulation(
 
 
 void PrintPopError( struct PopulationInfo ErrorInf ){
-    printf("Error: %s", PopError[ErrorInf.status]);
+
+    fprintf(stderr, "Error: %s", PopError[ErrorInf.status]);
 
     if( ErrorInf.status == EMPTY_PERSON ){
-        printf("%zu", ErrorInf.PopSize+1);
+        fprintf(stderr, "%zu", ErrorInf.PopSize+1);
     }
     
-    puts("");
+    fprintf(stderr, "\n");
 
     errno = 1;
 }

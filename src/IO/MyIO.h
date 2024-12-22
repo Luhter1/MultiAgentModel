@@ -1,5 +1,5 @@
 #ifndef IO
-#define IO 1
+#define IO
 
 #include <stdio.h>
 
@@ -9,7 +9,6 @@ enum FileStatus  {
         WRITE_ERROR,
         CLOSE_ERROR
 };
-
 
 enum FileStatus OpenRead(char* path, FILE **source);
 

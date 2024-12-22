@@ -10,31 +10,29 @@ static const char* const IOError[] = {
 };
 
 enum FileStatus OpenRead(char* path, FILE **source){
-    FILE *file = fopen(path, "rb");
+    *source = fopen(path, "rb");
 
-    if (!file) {
+    if( !(*source) ){
 
         errno = EACCES;
         return READ_ERROR;
 
     }
 
-    *source = file;
     return OK;
 }
 
 
 enum FileStatus OpenWrite(char* path, FILE **source) {
-    FILE *file = fopen(path, "wb");
+    *source = fopen(path, "wb");
 
-    if (!file) {
+    if( !(*source) ){
 
         errno = EACCES;
         return WRITE_ERROR;
 
     }
 
-    *source = file;
     return OK;
 
 }
@@ -49,6 +47,7 @@ enum FileStatus CloseFile(FILE* file){
     return OK;
 }
 
+
 void PrintIOError( enum FileStatus OpenResult ){
-    printf("Error: %s\n", IOError[OpenResult]);
+    fprintf(stderr, "Error: %s\n\n", IOError[OpenResult]);
 }

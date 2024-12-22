@@ -74,6 +74,32 @@ void PopAddBack( struct PeopleLinkedList** old, struct Person* person ) {
 
 
 
+void PopRemoveElement( 
+    struct PeopleLinkedList** people,
+    struct PeopleLinkedList* PrevPerson, 
+    struct PeopleLinkedList** CurrPerson
+){
+    size_t ind;
+    struct PeopleLinkedList* ToDel = *CurrPerson;
+
+    if( *CurrPerson == NULL ) return;
+
+    if( PrevPerson != NULL ){
+
+        PrevPerson->next = (*CurrPerson)->next;
+
+    }else{
+
+        *people = (*CurrPerson)->next;
+
+    }
+
+    *CurrPerson = (*CurrPerson)->next;
+    free( ToDel );
+}
+
+
+
 struct Person** PopToArray(struct PeopleLinkedList* list, size_t size){
     size_t ind;
     struct Person** people = malloc( sizeof(struct Person*) * size );

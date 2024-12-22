@@ -6,6 +6,7 @@
 
 enum illness_state{
     SUSCEPTIBLE,
+    IMMUNE,
     ILL,
     RECOVERED
 };
@@ -15,6 +16,7 @@ struct Person{
     int32_t work_id;
     int32_t school_id;
     int32_t household_id;
+    size_t IllDay;
     enum illness_state state;
 };
 

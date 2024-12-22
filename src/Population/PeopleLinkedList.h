@@ -21,6 +21,12 @@ struct PeopleLinkedList* PopLast( struct PeopleLinkedList * list );
 
 void PopAddBack( struct PeopleLinkedList** old, struct Person* person );
 
+void PopRemoveElement( 
+    struct PeopleLinkedList** people,
+    struct PeopleLinkedList* PrevPerson, 
+    struct PeopleLinkedList** CurrPerson
+);
+
 struct Person** PopToArray(struct PeopleLinkedList* population, size_t size);
 
 void DeleteArray(struct Person** people, size_t size);

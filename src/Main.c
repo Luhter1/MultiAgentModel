@@ -1,3 +1,4 @@
+#include "Utils.h"
 #include "MyIO.h"
 #include "Person.h"
 #include "PeopleLinkedList.h"
@@ -20,28 +21,43 @@ static void DestroySet(
 }
 
 
-// На текущий момент реализованно создание списка людей 
-// и множества мест заражений
-// осталось преобразовать множество мест заражений в списки связных списков людей
-// далее уже будет использован мультиагентный алгоритм заражения гриппом
+// multi_agent_model alpha lmbd init_inf dur ./path_to_file ./path_to_res
 int main( int argc, char** argv ) {
+    // параметра из командной строки
+    double alpha, lmbd;
+    size_t InitInfCount, duration;
+    // список связных списков
+    struct PeopleLinkedList **work, **household, **school;
+    // список person
+    struct Person** people; 
+    // данные для чтения/записи
+    FILE *EpidData, *ToWrite;
     // множество работ
     SetElement *SetWorks = NULL;
     // множество школ
     SetElement *SetSchools = NULL;
     // множество домов
     SetElement *SetHH = NULL;
-    // список связных списков
-    struct PeopleLinkedList **work, **household, **school;
-    // список person
-    struct Person** people; 
     // связный список 
-    struct PeopleLinkedList* illnesses;
-    // данные для чтения
-    FILE* EpidData;
+    struct PeopleLinkedList* IllPeople = NULL;
+
+    /*-------- валидация входных параметров -------*/
+    enum Validation ValRes = validate( 
+        argc, 
+        argv, 
+        &alpha, 
+        &lmbd, 
+        &InitInfCount, 
+        &duration 
+    );
+
+    if( ValRes != SUCCESS ){
+        PrintValidationError( ValRes );
+        return errno;
+    }
 
     /*----------- открытие файла для чтения ----------*/
-    enum FileStatus OpenResult = OpenRead(argv[1], &EpidData);
+    enum FileStatus OpenResult = OpenRead( argv[5], &EpidData );
 
     if( OpenResult != OK ){
         PrintIOError( OpenResult );
@@ -73,7 +89,7 @@ int main( int argc, char** argv ) {
         - множество школ
         - множество домов
     */
-    // people, &SetWorks, &SetSchools, &SetHH
+
     /*
     Надо:
         x создаем массив из пустых связных списков в размере домов
@@ -81,14 +97,34 @@ int main( int argc, char** argv ) {
         x создаем массив из пустых связных списков в размере работ
         x выбрать InitInfected 
         x заполнить множества мест людьми
-        - создать связный список больных
-        - добавить имунных
-        - задавать InitInfCount
+        x создать связный список больных
+        x проходиться каждый день по списку больных
+        x добавить имунных
+        x задавать alpha, lmbd, InitInfCount, modeling duration, 
+        x проверка, что InitInfCount <= PopSize 
+            (вообще это неразумные значения 
+             и в эпид моделировании не указывают такие большие числа 
+             так как эпидемия мгновенно заканчивается и при намного меньших долях)
+        x добавить lmbd в процесс заражения
+        - сделать --help и man
+        x сделать запиcь incidence значений в файл
+        - рефакторинг кода
+        - документация
+        x вывод ошибок в stderr
+        - нормальные логи в stdout
+
     */
 
-    ChooseInitialInfected( people, PopInfo.PopSize, 10 );
+    /*----------- создание списка первоначально больных и наделение иммунитетом людей ----------*/
+    PreparePeopleState( 
+        people, 
+        PopInfo.PopSize, 
+        &IllPeople, 
+        InitInfCount,
+        alpha
+    );
 
-    // /*----------- создание списка мест заражения и списка первоначально больных ----------*/
+    /*----------- создание списка мест заражения ----------*/
     work = CreatePlace( PopInfo.WorkSize );
     household = CreatePlace( PopInfo.HHSize );
     school = CreatePlace( PopInfo.SchoolSize );
@@ -105,12 +141,20 @@ int main( int argc, char** argv ) {
     );
 
     DestroySet( SetWorks, SetSchools, SetHH );
-    
-    // printf("%" PRId32 "\n", work[0]->person->id);
-    // printf("%d\n", work[141]->person->state);
-    // printf("%" PRId32 "\n", people[0]->state);
-    // printf("%" PRId32 "\n", people[2]->state);
 
+    /*----------- открыть файл для записи incidence -----------*/
+    OpenResult = OpenWrite( argv[6], &ToWrite );
+
+    if( OpenResult != OK )  PrintIOError( OpenResult );
+
+    /*------------ запуск процесса заражения гриппом ------------*/
+    Disease( people, household, work, school, &IllPeople, duration, lmbd, ToWrite  );
+
+    if( OpenResult == OK ) CloseFile( ToWrite );
+
+    // if( !IllPeople ) puts("None of Illness");
+    
+    puts("Successfully done!");
 
     DeleteArray( people, PopInfo.PopSize);
     return 0;
