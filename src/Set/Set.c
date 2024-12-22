@@ -19,11 +19,9 @@ void SetAdd(int id, size_t value, SetElement** set){
 
 		current_user = malloc(sizeof(SetElement));
 		current_user->id = id;
-		current_user->value = value;
 		HASH_ADD_INT(*set, id, current_user);
-
 	}
-
+	current_user->value = value;
 }
 
 size_t SetLength(SetElement* set){

@@ -13,7 +13,10 @@ enum IsValid{
 };
 
 struct PopulationInfo{
-    size_t size;
+    size_t PopSize;
+    size_t WorkSize;
+    size_t HHSize;
+    size_t SchoolSize;
     enum IsValid status;
 };
 

@@ -76,15 +76,14 @@ void PopAddBack( struct PeopleLinkedList** old, struct Person* person ) {
 
 struct Person** PopToArray(struct PeopleLinkedList* list, size_t size){
     size_t ind;
-    struct PeopleLinkedList* to_del;
     struct Person** people = malloc( sizeof(struct Person*) * size );
 
-    for(ind=0; ind<size; ind++){
-        to_del = list;
-        people[ind] = list->person;
+    for(ind=size; 0<ind; ind--){
+        people[ind-1] = list->person;
         list = list -> next; 
 
     }
+    // people[0] = list->person;
 
     return people;
 }

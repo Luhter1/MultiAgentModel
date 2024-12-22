@@ -89,22 +89,28 @@ static void UpdatePlacec(
 
     if( person->household_id != NULL_INDEX ){
 
-        SetAdd( person->household_id, *HHCount, SetHH );
-        (*HHCount)++;
+        if(SetGetElement( person->household_id, *SetHH ) == NULL){
+            SetAdd( person->household_id, *HHCount, SetHH );
+            (*HHCount)++;
+        }
 
     }
 
     if( person->school_id != NULL_INDEX ){
 
-        SetAdd( person->school_id, *SchoulCount, SetSchools );
-        (*SchoulCount)++;
+        if(SetGetElement( person->school_id, *SetSchools ) == NULL){
+            SetAdd( person->school_id, *SchoulCount, SetSchools );
+            (*SchoulCount)++;
+        }
 
     }
 
     if( person->work_id != NULL_INDEX ){
 
-        SetAdd( person->work_id, *WorkCount, SetWorks );
-        (*WorkCount)++;
+        if(SetGetElement( person->work_id, *SetWorks ) == NULL){
+            SetAdd( person->work_id, *WorkCount, SetWorks );
+            (*WorkCount)++;
+        }
 
     }
 }
@@ -149,7 +155,7 @@ struct PopulationInfo ReadPopulation(
         );
 
         if( curr == NULL){
-            PopInf.size = --PersonId;
+            PopInf.PopSize = --PersonId;
             PopInf.status = EMPTY_PERSON;
             return PopInf;
 
@@ -167,22 +173,23 @@ struct PopulationInfo ReadPopulation(
 
         PopAddFront( &population, curr );
     }
-    
-    PopInf.status = VALID;
-    PopInf.size = population->person->id + 1;
 
-    // int size = 2, current = 0, actual_size = 0, i = 0;
-    // int* array = malloc(sizeof(int) * size);
-    // array[1] = 2;
-    // printf("%d\n", array[1]);
+    // SetAdd( NULL_INDEX, NULL_INDEX, SetHH );
+    // SetAdd( NULL_INDEX, NULL_INDEX, SetWorks );
+    // SetAdd( NULL_INDEX, NULL_INDEX, SetSchools );
+
+    PopInf.status = VALID;
+    PopInf.PopSize = population->person->id + 1;
+    PopInf.WorkSize = WorkCount;
+    PopInf.HHSize = HHCount;
+    PopInf.SchoolSize = SchoulCount;
 
     // преобразуем связный список людей в массив 
     // для быстрой адресации к элементам
-    *people = PopToArray( population, PopInf.size );
+    *people = PopToArray( population, PopInf.PopSize );
 
     // удаляем связный список
-    PopDestroy( population, PopInf.size );
-
+    PopDestroy( population, PopInf.PopSize );
     return PopInf;
 }
 
@@ -192,7 +199,7 @@ void PrintPopError( struct PopulationInfo ErrorInf ){
     printf("Error: %s", PopError[ErrorInf.status]);
 
     if( ErrorInf.status == EMPTY_PERSON ){
-        printf("%zu", ErrorInf.size+1);
+        printf("%zu", ErrorInf.PopSize+1);
     }
     
     puts("");
