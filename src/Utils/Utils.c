@@ -7,7 +7,16 @@
 #include <stdio.h>
 #include <unistd.h>
 
-// const char* Help = "Try --help to see info";
+const char* Help = "\
+Usage: ./multi_agent_model [ALPHA] [LMBD] [INIT_INF_COUNT] [DURATION] [PATH_TO_DATA] [PATH_TO_RESULT]\n\
+\n\
+ALPHA (double) - proportion of people not susceptible to the disease in the population\n\
+LMBD (double) - degree of infectiousness of the virus\n\
+INIT_INF_COUNT (long) - number of people initially infected\n\
+DURATION (long) - modelling duration\n\
+PATH_TO_DATA (string)\n\
+PATH_TO_RESULT (string)\n\
+";
 
 
 const char* ValidationError[] = {
@@ -20,10 +29,17 @@ const char* ValidationError[] = {
 };
 
 
-// void CheckHelp( int argc, char** argv ){
-//     if( argc != 1) return;
+enum Validation ChechHelp( int argc, char** argv ){
+    if( argc != 2 ){
+        errno = 22;
+        return ARG_NUM_ERROR;
+    }
 
-// }
+    if (strcmp(argv[1], "--help") == 0) {
+        return HELP;
+    }
+
+}
 
 
 bool GetDouble( char* str, double* num ){
@@ -57,8 +73,7 @@ enum Validation validate(
 
     if( argc != 7 ){
 
-        errno = 22;
-        return ARG_NUM_ERROR;
+        return ChechHelp( argc, argv );
 
     }
 
@@ -99,6 +114,12 @@ enum Validation validate(
 
     return SUCCESS;
 }
+
+
+void PrintHelp(){
+    puts(Help);
+}
+
 
 void PrintValidationError( enum Validation ValidResult ){
     fprintf(stderr, "Error: %s\n", ValidationError[ValidResult]);

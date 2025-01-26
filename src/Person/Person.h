@@ -20,7 +20,7 @@ struct Person{
     enum illness_state state;
 };
 
-struct Person* CreatePerson(
+struct Person* PersonCreate(
     int32_t id,
     int32_t work_id,
     int32_t school_id,
@@ -35,6 +35,6 @@ struct Person* PersonFromString(
     size_t work_index
 );
 
-void DeletePerson(struct Person* person);
+void PersonDelete(struct Person* person);
 
 #endif

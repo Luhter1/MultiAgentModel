@@ -5,7 +5,8 @@
 #include <stddef.h>
 
 enum Validation  {
-        SUCCESS,   
+        SUCCESS,
+        HELP,   
         FILE_ACCESS_ERROR,  
         ARG_NUM_ERROR,
         ALPHA_ERROR,
@@ -26,6 +27,8 @@ enum Validation validate(
     size_t* InitInfCount,
     size_t* duration
 );
+
+void PrintHelp();
 
 void PrintValidationError( enum Validation ValidResult );
 

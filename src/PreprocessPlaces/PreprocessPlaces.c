@@ -1,5 +1,5 @@
 #include "PreprocessPlaces.h"
-#include "Set.h"
+#include "Dict.h"
 #include "PeopleLinkedList.h"
 #include <stddef.h>
 
@@ -25,12 +25,12 @@ void UpdatePlaces(
     struct PeopleLinkedList** work, 
     struct PeopleLinkedList** household, 
     struct PeopleLinkedList** school, 
-    SetElement* SetHH,
-    SetElement* SetWorks,
-    SetElement* SetSchools 
+    DictElement* DictHH,
+    DictElement* DictWorks,
+    DictElement* DictSchools 
 ){
     size_t ind;
-    SetElement* curr;
+    DictElement* curr;
 
     for(ind=0; ind<PopSize; ind++){
 
@@ -38,21 +38,21 @@ void UpdatePlaces(
 
         if( CurrPerson->household_id != -1 ){
 
-            curr = SetGetElement( people[ind]->household_id, SetHH );
+            curr = DictGetElement( people[ind]->household_id, DictHH );
             people[ind]->household_id = curr->value;
             PopAddFront( household + curr->value, people[ind] );
         }
 
         if( CurrPerson->work_id != -1 ){
 
-            curr = SetGetElement( people[ind]->work_id, SetWorks );
+            curr = DictGetElement( people[ind]->work_id, DictWorks );
             people[ind]->work_id = curr->value;
             PopAddFront( work + curr->value, people[ind] );
         }
 
         if( CurrPerson->school_id != -1 ){
 
-            curr = SetGetElement( people[ind]->school_id, SetSchools );
+            curr = DictGetElement( people[ind]->school_id, DictSchools );
             people[ind]->school_id = curr->value;
             PopAddFront( school + curr->value, people[ind] );
         }

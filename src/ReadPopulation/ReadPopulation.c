@@ -1,7 +1,7 @@
 #include "ReadPopulation.h"
 #include "PeopleLinkedList.h"
 #include "Person.h"
-#include "Set.h"
+#include "Dict.h"
 #include <stddef.h>
 #include <string.h>
 #include <stdio.h>
@@ -52,7 +52,7 @@ static void CheckIndex( char* str, struct IdIndex* ids, size_t index ){
 
 
 
-static enum IsValid validate( struct IdIndex* ids ){
+static enum PopulationIsValid PopulationValidate( struct IdIndex* ids ){
     if( InvalidInd.sp_hh_id == ids->sp_hh_id ) return EMPTY_INDEX;
     else if( InvalidInd.sp_school_id == ids->sp_school_id ) return EMPTY_INDEX;
     else if( InvalidInd.sp_work_id == ids->sp_work_id ) return EMPTY_INDEX;
@@ -62,7 +62,7 @@ static enum IsValid validate( struct IdIndex* ids ){
 
 
 
-static enum IsValid GetIdIndex( char* header, struct IdIndex* ids ){
+static enum PopulationIsValid GetIdIndex( char* header, struct IdIndex* ids ){
     char *token = strtok( header, ",");
     size_t index = 0;
 
@@ -72,25 +72,25 @@ static enum IsValid GetIdIndex( char* header, struct IdIndex* ids ){
         index++;
     }
 
-    return validate( ids );
+    return PopulationValidate( ids );
 }
 
 
 
 static void UpdatePlacec( 
     struct Person* person, 
-    SetElement** SetHH, 
-    SetElement** SetWorks, 
-    SetElement** SetSchools,
+    DictElement** DictHH, 
+    DictElement** DictWorks, 
+    DictElement** DictSchools,
     size_t* HHCount, 
     size_t* WorkCount,
     size_t* SchoulCount
 ){
-    // 3 func
+
     if( person->household_id != NULL_INDEX ){
 
-        if(SetGetElement( person->household_id, *SetHH ) == NULL){
-            SetAdd( person->household_id, *HHCount, SetHH );
+        if(DictGetElement( person->household_id, *DictHH ) == NULL){
+            DictAdd( person->household_id, *HHCount, DictHH );
             (*HHCount)++;
         }
 
@@ -98,8 +98,8 @@ static void UpdatePlacec(
 
     if( person->school_id != NULL_INDEX ){
 
-        if(SetGetElement( person->school_id, *SetSchools ) == NULL){
-            SetAdd( person->school_id, *SchoulCount, SetSchools );
+        if(DictGetElement( person->school_id, *DictSchools ) == NULL){
+            DictAdd( person->school_id, *SchoulCount, DictSchools );
             (*SchoulCount)++;
         }
 
@@ -107,8 +107,8 @@ static void UpdatePlacec(
 
     if( person->work_id != NULL_INDEX ){
 
-        if(SetGetElement( person->work_id, *SetWorks ) == NULL){
-            SetAdd( person->work_id, *WorkCount, SetWorks );
+        if(DictGetElement( person->work_id, *DictWorks ) == NULL){
+            DictAdd( person->work_id, *WorkCount, DictWorks );
             (*WorkCount)++;
         }
 
@@ -118,14 +118,14 @@ static void UpdatePlacec(
 
 
 struct PopulationInfo ReadPopulation( 
-    struct Person*** people, 
+    struct Person*** population, 
     FILE* EpidData,
-    SetElement** SetWorks,
-    SetElement** SetSchools,
-    SetElement** SetHH
+    DictElement** DictWorks,
+    DictElement** DictSchools,
+    DictElement** DictHH
 ){
     char line[1024];
-    struct PeopleLinkedList* population;
+    struct PeopleLinkedList* LinkedPopulation;
     size_t PersonId = 0;
     struct IdIndex ids = {-1};
     struct PopulationInfo PopInf = {0};
@@ -155,6 +155,7 @@ struct PopulationInfo ReadPopulation(
         );
 
         if( curr == NULL){
+
             PopInf.PopSize = --PersonId;
             PopInf.status = EMPTY_PERSON;
             return PopInf;
@@ -163,39 +164,37 @@ struct PopulationInfo ReadPopulation(
 
         UpdatePlacec(
             curr, 
-            SetHH, 
-            SetWorks, 
-            SetSchools, 
+            DictHH, 
+            DictWorks, 
+            DictSchools, 
             &HHCount, 
             &WorkCount,
             &SchoulCount
         );
 
-        PopAddFront( &population, curr );
+        PopAddFront( &LinkedPopulation, curr );
     }
 
-    // SetAdd( NULL_INDEX, NULL_INDEX, SetHH );
-    // SetAdd( NULL_INDEX, NULL_INDEX, SetWorks );
-    // SetAdd( NULL_INDEX, NULL_INDEX, SetSchools );
 
     PopInf.status = VALID;
-    PopInf.PopSize = population->person->id + 1;
+    PopInf.PopSize = LinkedPopulation->person->id + 1;
     PopInf.WorkSize = WorkCount;
     PopInf.HHSize = HHCount;
     PopInf.SchoolSize = SchoulCount;
 
     // преобразуем связный список людей в массив 
     // для быстрой адресации к элементам
-    *people = PopToArray( population, PopInf.PopSize );
+    *population = PopToArray( LinkedPopulation, PopInf.PopSize );
 
     // удаляем связный список
-    PopDestroy( population, PopInf.PopSize );
+    PopDestroy( LinkedPopulation, PopInf.PopSize );
+    
     return PopInf;
 }
 
 
 
-void PrintPopError( struct PopulationInfo ErrorInf ){
+void PrintPopulationError( struct PopulationInfo ErrorInf ){
 
     fprintf(stderr, "Error: %s", PopError[ErrorInf.status]);
 

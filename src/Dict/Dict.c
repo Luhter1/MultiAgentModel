@@ -1,31 +1,31 @@
-#include "Set.h"
+#include "Dict.h"
 #include <uthash.h>
 #include <stdio.h>
 #include <inttypes.h>
 #include <malloc.h>
 
-SetElement* SetGetElement(int id, SetElement* set){
-	SetElement *current_user;
+DictElement* DictGetElement(int id, DictElement* set){
+	DictElement *current_user;
 
 	HASH_FIND_INT(set, &id, current_user);
 
 	return current_user;
 }
 
-void SetAdd(int id, size_t value, SetElement** set){
-	SetElement *current_user = SetGetElement( id, *set );
+void DictAdd(int id, size_t value, DictElement** set){
+	DictElement *current_user = DictGetElement( id, *set );
 
 	if (current_user == NULL) {
 
-		current_user = malloc(sizeof(SetElement));
+		current_user = malloc(sizeof(DictElement));
 		current_user->id = id;
 		HASH_ADD_INT(*set, id, current_user);
 	}
 	current_user->value = value;
 }
 
-size_t SetLength(SetElement* set){
-	SetElement *current_user, *tmp;
+size_t DictLength(DictElement* set){
+	DictElement *current_user, *tmp;
 	size_t size = 0;
 
 	HASH_ITER(hh, set, current_user, tmp) {
@@ -37,8 +37,8 @@ size_t SetLength(SetElement* set){
 	return size;
 }
 
-void SetDeleteALL(SetElement* set){
-	SetElement *current_user, *tmp;
+void DictDeleteALL(DictElement* set){
+	DictElement *current_user, *tmp;
 
 	HASH_ITER(hh, set, current_user, tmp) {
 

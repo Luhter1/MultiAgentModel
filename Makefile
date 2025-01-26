@@ -1,9 +1,11 @@
-CFLAGS += 
-
+CFLAGS = -o2 -Ilibs
 
 # Добавление всех поддиректорий
 INCLUDE_DIRS := $(shell find ./src -type d)
 CFLAGS += $(addprefix -I,$(INCLUDE_DIRS))
+
+OUTPUT_DIR = build
+SRC_DIR = src
 
 build:
 	gcc -Ilibs $(CFLAGS) ./src/*.c ./src/*/*.c -o multi_agent_model
