@@ -9,7 +9,7 @@
 #define NULL_INDEX -1
 #define ERROR_INDEX -2
 
-struct Person* CreatePerson(
+struct Person* PersonCreate(
     int32_t id,
     int32_t work_id,
     int32_t school_id,
@@ -84,7 +84,7 @@ struct Person* PersonFromString(
         household_id != ERROR_INDEX 
     ){
 
-        return CreatePerson( id, work_id, school_id, household_id );  
+        return PersonCreate( id, work_id, school_id, household_id );  
 
     } 
 
@@ -93,6 +93,6 @@ struct Person* PersonFromString(
 
 
 
-void DeletePerson(struct Person* person){
+void PersonDelete(struct Person* person){
     free( person );
 }

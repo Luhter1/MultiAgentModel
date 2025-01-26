@@ -8,6 +8,7 @@
 
 #define round( num ) (int)(num < 0 ? (num - 0.5) : (num + 0.5))
 
+// функция заразности Барояна-Рвачева
 static const int BRfunc[] = {0, 0, 90, 90, 55, 30, 15, 5};
 
 static int InfRand( size_t Num ){
@@ -168,7 +169,7 @@ static size_t day(
         struct Person* person = CurrPerson->person;
         int infectivity = round( lmbd * BRfunc[ person->IllDay ] );
 
-        // Надо вирулентность умножить на lmbd
+
         Incidence += HHInfection( IllPeople, person, household, infectivity );
 
         if( person->work_id != -1 ){
@@ -223,10 +224,10 @@ void Disease(
 
         }
 
-        if( ToWrite != NULL ) fprintf(ToWrite, "%zu\n", Incidence);
-        
+        if( ToWrite != NULL ) fprintf(ToWrite, "%zu\n", PopLength( *IllPeople ));
+
         printf("Day: %zu\n", CurrDay);
-        printf("Ill count: %zu\n", PopLength( *IllPeople ));
+        printf("Prevalence: %zu\n", PopLength( *IllPeople ));
         printf("Incidence: %zu\n", Incidence);
         puts("");
 

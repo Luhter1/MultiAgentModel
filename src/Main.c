@@ -5,23 +5,23 @@
 #include "ReadPopulation.h"
 #include "PreprocessPlaces.h"
 #include "EpidProcesses.h"
-#include "Set.h"
+#include "Dict.h"
 #include <stdio.h>
 #include <errno.h>
 #include <inttypes.h>
 
 static void DestroySet(
-    SetElement *SetWorks, 
-    SetElement *SetSchools, 
-    SetElement *SetHH
+    DictElement *DictWorks, 
+    DictElement *DictSchools, 
+    DictElement *DictHH
 ){
-    SetDeleteALL( SetSchools );
-    SetDeleteALL( SetHH );
-    SetDeleteALL( SetWorks );
+    DictDeleteALL( DictSchools );
+    DictDeleteALL( DictHH );
+    DictDeleteALL( DictWorks );
 }
 
 
-// multi_agent_model alpha lmbd init_inf dur ./path_to_file ./path_to_res
+
 int main( int argc, char** argv ) {
     // параметра из командной строки
     double alpha, lmbd;
@@ -29,15 +29,15 @@ int main( int argc, char** argv ) {
     // список связных списков
     struct PeopleLinkedList **work, **household, **school;
     // список person
-    struct Person** people; 
+    struct Person** population; 
     // данные для чтения/записи
     FILE *EpidData, *ToWrite;
     // множество работ
-    SetElement *SetWorks = NULL;
+    DictElement *DictWorks = NULL;
     // множество школ
-    SetElement *SetSchools = NULL;
+    DictElement *DictSchools = NULL;
     // множество домов
-    SetElement *SetHH = NULL;
+    DictElement *DictHH = NULL;
     // связный список 
     struct PeopleLinkedList* IllPeople = NULL;
 
@@ -51,7 +51,10 @@ int main( int argc, char** argv ) {
         &duration 
     );
 
-    if( ValRes != SUCCESS ){
+    if( ValRes == HELP ){
+        PrintHelp();
+        return errno;
+    }else if( ValRes != SUCCESS ){
         PrintValidationError( ValRes );
         return errno;
     }
@@ -67,62 +70,31 @@ int main( int argc, char** argv ) {
 
     /*----------- создание популяции и множества мест заражений ----------*/
     struct PopulationInfo PopInfo = ReadPopulation( 
-        &people, 
+        &population, 
         EpidData, 
-        &SetWorks, 
-        &SetSchools, 
-        &SetHH 
+        &DictWorks, 
+        &DictSchools, 
+        &DictHH 
     );
 
     CloseFile( EpidData );
 
     if( PopInfo.status != VALID ){
-        DestroySet(SetWorks, SetSchools, SetHH);
-        PrintPopError( PopInfo );
+        DestroySet(DictWorks, DictSchools, DictHH);
+        PrintPopulationError( PopInfo );
         return errno;
     }
 
-    /*
-    Есть:
-        - массив людей
-        - множество работ
-        - множество школ
-        - множество домов
-    */
-
-    /*
-    Надо:
-        x создаем массив из пустых связных списков в размере домов
-        x создаем массив из пустых связных списков в размере школ
-        x создаем массив из пустых связных списков в размере работ
-        x выбрать InitInfected 
-        x заполнить множества мест людьми
-        x создать связный список больных
-        x проходиться каждый день по списку больных
-        x добавить имунных
-        x задавать alpha, lmbd, InitInfCount, modeling duration, 
-        x проверка, что InitInfCount <= PopSize 
-            (вообще это неразумные значения 
-             и в эпид моделировании не указывают такие большие числа 
-             так как эпидемия мгновенно заканчивается и при намного меньших долях)
-        x добавить lmbd в процесс заражения
-        - сделать --help и man
-        x сделать запиcь incidence значений в файл
-        - рефакторинг кода
-        - документация
-        x вывод ошибок в stderr
-        - нормальные логи в stdout
-
-    */
 
     /*----------- создание списка первоначально больных и наделение иммунитетом людей ----------*/
     PreparePeopleState( 
-        people, 
+        population, 
         PopInfo.PopSize, 
         &IllPeople, 
         InitInfCount,
         alpha
     );
+
 
     /*----------- создание списка мест заражения ----------*/
     work = CreatePlace( PopInfo.WorkSize );
@@ -130,32 +102,32 @@ int main( int argc, char** argv ) {
     school = CreatePlace( PopInfo.SchoolSize );
 
     UpdatePlaces( 
-        people, 
+        population, 
         PopInfo.PopSize, 
         work, 
         household, 
         school, 
-        SetHH,
-        SetWorks,
-        SetSchools 
+        DictHH,
+        DictWorks,
+        DictSchools 
     );
 
-    DestroySet( SetWorks, SetSchools, SetHH );
+    DestroySet( DictWorks, DictSchools, DictHH );
+
 
     /*----------- открыть файл для записи incidence -----------*/
     OpenResult = OpenWrite( argv[6], &ToWrite );
 
     if( OpenResult != OK )  PrintIOError( OpenResult );
 
+
     /*------------ запуск процесса заражения гриппом ------------*/
-    Disease( people, household, work, school, &IllPeople, duration, lmbd, ToWrite  );
+    Disease( population, household, work, school, &IllPeople, duration, lmbd, ToWrite  );
 
     if( OpenResult == OK ) CloseFile( ToWrite );
-
-    // if( !IllPeople ) puts("None of Illness");
     
     puts("Successfully done!");
+    DeleteArray( population, PopInfo.PopSize);
 
-    DeleteArray( people, PopInfo.PopSize);
     return 0;
 }

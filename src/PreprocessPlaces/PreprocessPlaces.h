@@ -1,7 +1,7 @@
 #ifndef PREPROCESSPLACES
 #define PREPROCESSPLACES
 
-#include "Set.h"
+#include "Dict.h"
 #include "PeopleLinkedList.h"
 #include <stddef.h>
 
@@ -13,9 +13,9 @@ void UpdatePlaces(
     struct PeopleLinkedList** work, 
     struct PeopleLinkedList** household, 
     struct PeopleLinkedList** school, 
-    SetElement* SetHH,
-    SetElement* SetWorks,
-    SetElement* SetSchools 
+    DictElement* DictHH,
+    DictElement* DictWorks,
+    DictElement* DictSchools 
 );
 
 #endif
